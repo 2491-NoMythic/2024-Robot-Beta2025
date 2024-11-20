@@ -373,7 +373,7 @@ public static final int INTAKE_SIDE_MOTOR_LEFT = 25;
   public static final double INTAKE_2_kP = 0.00007;
   public static final double INTAKE_2_kI = 0;//0.7;
   public static final double INTAKE_2_kD = 0;//0.002;
-  public static final double INTAKE_2_kF = 0.00009;
+  public static final double INTAKE_2_kFF = 0.00009;
 }
 public static final class CTREConfigs {
   public TalonFXConfiguration driveMotorConfig;

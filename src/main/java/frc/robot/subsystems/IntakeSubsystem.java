@@ -4,19 +4,26 @@
 
 package frc.robot.subsystems;
 
+import static frc.robot.settings.Constants.ShooterConstants.CURRENT_LIMIT;
+
 import com.ctre.phoenix6.signals.ControlModeValue;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.MotorFeedbackSensor;
-import com.revrobotics.SparkAnalogSensor;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.SparkAnalogSensor.Mode;
-import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkAnalogSensor;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.AnalogSensorConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.AlternateEncoderConfig.Type;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,12 +33,16 @@ import frc.robot.settings.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new Intake. */
-  CANSparkMax intake1;
-  SparkPIDController intake1Controller;
-  CANSparkMax intake2;
-  SparkPIDController intake2Controller;
-  CANSparkMax intakeSideLeft;
-  CANSparkMax intakeSideRight;
+  SparkMax intake1;
+  ClosedLoopConfig intake1Controller;
+  SparkMaxConfig intake1Config;
+  SparkMax intake2;
+  ClosedLoopConfig intake2Controller;
+  SparkMaxConfig intake2Config;
+  SparkMax intakeSideLeft;
+  SparkMaxConfig intakeSideLeftConfig;
+  SparkMax intakeSideRight;
+  SparkMaxConfig intakeSideRightConfig;
   SparkAnalogSensor m_DistanceSensor;
   boolean isNoteHeld;
 
@@ -43,51 +54,47 @@ public class IntakeSubsystem extends SubsystemBase {
   double intakeRunSpeed;
 
   public IntakeSubsystem() {
-    intake1 = new CANSparkMax(IntakeConstants.INTAKE_1_MOTOR, MotorType.kBrushless);
-    intake2 = new CANSparkMax(IntakeConstants.INTAKE_2_MOTOR, MotorType.kBrushless);
-    intake1.restoreFactoryDefaults();
-    intake2.restoreFactoryDefaults();
-    intake1Controller = intake1.getPIDController();
-    intake2Controller = intake2.getPIDController();
-      intake1Controller.setP(IntakeConstants.INTAKE_1_kP);
-      intake1Controller.setI(IntakeConstants.INTAKE_1_kI);
-      intake1Controller.setD(IntakeConstants.INTAKE_1_kD);
-      intake1Controller.setFF(IntakeConstants.INTAKE_1_kFF);
-      intake2Controller.setP(IntakeConstants.INTAKE_2_kP);
-      intake2Controller.setI(IntakeConstants.INTAKE_2_kI);
-      intake2Controller.setD(IntakeConstants.INTAKE_2_kD);
-      intake2Controller.setFF(IntakeConstants.INTAKE_2_kF);
+    intake1 = new SparkMax(IntakeConstants.INTAKE_1_MOTOR, SparkLowLevel.MotorType.kBrushless);
+    intake2 = new SparkMax(IntakeConstants.INTAKE_2_MOTOR, SparkLowLevel.MotorType.kBrushless);
+    intake1Controller.pidf(IntakeConstants.INTAKE_1_kP, 
+                           IntakeConstants.INTAKE_1_kI, 
+                           IntakeConstants.INTAKE_1_kD,
+                           IntakeConstants.INTAKE_1_kFF);
+    intake2Controller.pidf(IntakeConstants.INTAKE_2_kP, 
+                           IntakeConstants.INTAKE_2_kI, 
+                           IntakeConstants.INTAKE_2_kD,
+                           IntakeConstants.INTAKE_2_kFF);
     intake1.setInverted(true);
     intake2.setInverted(true);
-    intake1.setIdleMode(IdleMode.kCoast);
-    intake2.setIdleMode(IdleMode.kCoast);
-    intake1.setSmartCurrentLimit(25, 40, 1000);
-    intake2.setSmartCurrentLimit(25, 40, 1000);
-    intake1.burnFlash();
-    intake2.burnFlash();
+    intake1Config.idleMode(IdleMode.kCoast);
+    intake2Config.idleMode(IdleMode.kCoast);
+    intake1Config.smartCurrentLimit(25, 40, 1000);
+    intake2Config.smartCurrentLimit(25, 40, 1000);
+    intake1Config.apply(intake1Controller);
+    intake2Config.apply(intake2Controller);
+    m_DistanceSensor = intake1.getAnalog();
+    intake1.configure(intake1Config, null, null);
+    intake2.configure(intake2Config, null, null);
 
     if (Preferences.getBoolean("IntakeSideWheels", false)) {
-      intakeSideLeft = new CANSparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_LEFT, MotorType.kBrushless);
-      intakeSideRight = new CANSparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_RIGHT, MotorType.kBrushless);
-      intakeSideLeft.restoreFactoryDefaults();
-      intakeSideRight.restoreFactoryDefaults();
+      intakeSideLeft = new SparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_LEFT, MotorType.kBrushless);
+      intakeSideRight = new SparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_RIGHT, MotorType.kBrushless);
       intakeSideLeft.setInverted(false);
       intakeSideRight.setInverted(true);
-      intakeSideLeft.setIdleMode(IdleMode.kCoast);
-      intakeSideRight.setIdleMode(IdleMode.kCoast);
-      intakeSideLeft.setSmartCurrentLimit(25, 40, 1000);
-      intakeSideRight.setSmartCurrentLimit(25, 40, 1000);
-      intakeSideRight.getEncoder().setPositionConversionFactor(1);
-      intakeSideLeft.getEncoder().setPositionConversionFactor(1);
-      intakeSideLeft.burnFlash();
-      intakeSideRight.burnFlash();
-      //intakeSideRight.getPIDController().setReference(intakeRunSpeed, CANSparkMax.ControlType.kVelocity)
+      intakeSideLeftConfig.idleMode(IdleMode.kCoast);
+      intakeSideRightConfig.idleMode(IdleMode.kCoast);
+      intakeSideLeftConfig.smartCurrentLimit(25, 40, 1000);
+      intakeSideRightConfig.smartCurrentLimit(25, 40, 1000);
+      intakeSideLeftConfig.encoder.positionConversionFactor(1);
+      intakeSideRightConfig.encoder.positionConversionFactor(1);
+      intakeSideLeft.configure(intakeSideLeftConfig, null, null);
+      intakeSideRight.configure(intakeSideRightConfig, null, null);
     }
 
     if (Preferences.getBoolean("CompBot", true)) {
-      m_DistanceSensor = intakeSideLeft.getAnalog(Mode.kAbsolute);
+      m_DistanceSensor = intakeSideLeft.getAnalog();
     } else {
-      m_DistanceSensor = intakeSideLeft.getAnalog(Mode.kAbsolute);
+      m_DistanceSensor = intakeSideLeft.getAnalog();
     }
 
     DataLog log = DataLogManager.getLog();
@@ -119,8 +126,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
   // intakeSubsystem.function(0.5);
   public void setVelocity(double velocity) {
-    intake1Controller.setReference(velocity, CANSparkMax.ControlType.kVelocity);
-    intake2Controller.setReference(velocity, CANSparkMax.ControlType.kVelocity);
+     intake1Controller.setReference(velocity, SparkMax.ControlType.kVelocity);
+     intake2Controller.setReference(velocity, SparkMax.ControlType.kVelocity);
   }
 
   public void intakeSideWheels(double sideWheelRunSpeed) {
