@@ -4,29 +4,35 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkLimitSwitch;
-import com.revrobotics.SparkRelativeEncoder;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.SparkLimitSwitch.Type;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLimitSwitch;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.LimitSwitchConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
+import com.revrobotics.spark.config.EncoderConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.settings.Constants.ClimberConstants;
 
 public class Climber extends SubsystemBase {
-  CANSparkMax climbMotorR;
-  CANSparkMax climbMotorL;
+  SparkMax climbMotorR;
+  SparkMax climbMotorL;
+  SparkMaxConfig climbMotorRConfig;
+  SparkMaxConfig climbMotorLConfig;
   RelativeEncoder climbEncoderR;
   RelativeEncoder climbEncoderL;
+  EncoderConfig climbEncoderConfig;
   double speed;
   double voltage;
   double currentEncoderRotationsL;
   double currentEncoderRotationsR;
-  SparkLimitSwitch limitSwitchR;
-  SparkLimitSwitch limitSwitchL;
+  LimitSwitchConfig limitSwitchConfig;
   double initialEncoderRotationsL;
   double initialEncoderRotationsR;
   SparkLimitSwitch hallEffectR;
@@ -39,22 +45,37 @@ public class Climber extends SubsystemBase {
   public Climber() {
     runSpeedL = 0;
     runSpeedR = 0;
-    climbMotorR = new CANSparkMax(ClimberConstants.CLIMBER_MOTOR_RIGHT, MotorType.kBrushless);
-    climbMotorL = new CANSparkMax(ClimberConstants.CLIMBER_MOTOR_LEFT, MotorType.kBrushless);
+    climbEncoderConfig = new EncoderConfig();
+    climbEncoderConfig.countsPerRevolution(42);
+    limitSwitchConfig = new LimitSwitchConfig();
+    limitSwitchConfig.forwardLimitSwitchType(Type.kNormallyOpen);
+    //Creates the left and right motors, and their limit switches
+    climbMotorR = new SparkMax(ClimberConstants.CLIMBER_MOTOR_RIGHT, MotorType.kBrushless);
+    climbMotorL = new SparkMax(ClimberConstants.CLIMBER_MOTOR_LEFT, MotorType.kBrushless);
     climbMotorR.setInverted(true);
     climbMotorL.setInverted(true);
-    hallEffectL = climbMotorL.getForwardLimitSwitch(Type.kNormallyOpen);
-    hallEffectR = climbMotorR.getForwardLimitSwitch(Type.kNormallyOpen);
-    climbEncoderR = climbMotorR.getEncoder(SparkRelativeEncoder.Type.kHallSensor, 42);
-    climbEncoderL = climbMotorL.getEncoder(SparkRelativeEncoder.Type.kHallSensor, 42);
-    climbMotorL.setIdleMode(IdleMode.kBrake);
-    climbMotorR.setIdleMode(IdleMode.kBrake);
+    //creates and defines the configurations for the Left climber motor
+    climbMotorLConfig = new SparkMaxConfig();
+    climbMotorLConfig.idleMode(IdleMode.kBrake);
+    climbMotorLConfig.apply(climbEncoderConfig);
+    climbMotorLConfig.apply(limitSwitchConfig);
+    climbMotorL.configure(climbMotorLConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    //creates and defines the configurations for the right climber motor
+    climbMotorRConfig = new SparkMaxConfig();
+    climbMotorRConfig.idleMode(IdleMode.kBrake);
+    climbMotorRConfig.apply(climbEncoderConfig);
+    climbMotorRConfig.apply(limitSwitchConfig);
+    climbMotorR.configure(climbMotorRConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    
+    climbEncoderL = climbMotorL.getEncoder();
+    climbEncoderR = climbMotorR.getEncoder();
     initialEncoderRotationsL = Math.abs(climbEncoderL.getPosition());
     initialEncoderRotationsL = Math.abs(climbEncoderR.getPosition());
-    climbMotorL.burnFlash();
-    climbMotorR.burnFlash();
+
+    hallEffectL = climbMotorL.getForwardLimitSwitch();
+    hallEffectR = climbMotorR.getForwardLimitSwitch();
   }
- public void climberGoLeft(double speed){
+  public void climberGoLeft(double speed){
     runSpeedL = speed;
  }
  
