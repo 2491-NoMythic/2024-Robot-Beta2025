@@ -17,7 +17,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.SparkAnalogSensor;
 
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -38,7 +37,6 @@ public class IndexerSubsystem extends SubsystemBase {
 
     public IndexerSubsystem(BooleanSupplier isNoteIn) {
         m_IndexerMotor = new TalonFX(IndexerConstants.INDEXER_MOTOR);
-        m_IndexerMotor.setInverted(false);
         m_IndexerMotor.setNeutralMode(NeutralModeValue.Brake);
         this.isNoteIn = isNoteIn;
 
@@ -47,7 +45,9 @@ public class IndexerSubsystem extends SubsystemBase {
         currentLimitsConfigs.SupplyCurrentLimitEnable = true;
 
         configurator = m_IndexerMotor.getConfigurator();
+        configurator.apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
         configurator.apply(currentLimitsConfigs);
+
 
         motorLogger = new MotorLogger(DataLogManager.getLog(), "/indexer/motor");
         notePositionLog = new DoubleLogEntry(DataLogManager.getLog(),"/indexer/notePosistion");
@@ -63,8 +63,7 @@ public class IndexerSubsystem extends SubsystemBase {
                         .withMotionMagicCruiseVelocity(IndexerConstants.INDEXER_CRUISE_VELOCITY)
                         .withMotionMagicAcceleration(IndexerConstants.INDEXER_ACCELERATION)
                         .withMotionMagicJerk(IndexerConstants.INDEXER_JERK));
-        m_IndexerMotor.getConfigurator().apply(talonFXConfig);
-
+        configurator.apply(talonFXConfig);
     }
     /**
      * sets the speed of the indexer motor to INDEXER_INTAKE_SPEED (from constants)
