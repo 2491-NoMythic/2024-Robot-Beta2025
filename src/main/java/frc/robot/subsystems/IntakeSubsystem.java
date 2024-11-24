@@ -12,9 +12,12 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.AnalogSensorConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.SignalsConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.AlternateEncoderConfig.Type;
@@ -34,10 +37,10 @@ import frc.robot.settings.Constants.IntakeConstants;
 public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new Intake. */
   SparkMax intake1;
-  ClosedLoopConfig intake1Controller;
+  ClosedLoopConfig intake1PIDConfig;
   SparkMaxConfig intake1Config;
   SparkMax intake2;
-  ClosedLoopConfig intake2Controller;
+  ClosedLoopConfig intake2PIDConfig;
   SparkMaxConfig intake2Config;
   SparkMax intakeSideLeft;
   SparkMaxConfig intakeSideLeftConfig;
@@ -54,27 +57,35 @@ public class IntakeSubsystem extends SubsystemBase {
   double intakeRunSpeed;
 
   public IntakeSubsystem() {
+    //creates and applies the configurations for the motor Intake1 and it's PID configurator
+    intake1PIDConfig = new ClosedLoopConfig();
+    intake1Config = new SparkMaxConfig();
     intake1 = new SparkMax(IntakeConstants.INTAKE_1_MOTOR, SparkLowLevel.MotorType.kBrushless);
+    intake1PIDConfig.pidf(
+      IntakeConstants.INTAKE_1_kP, 
+      IntakeConstants.INTAKE_1_kI, 
+      IntakeConstants.INTAKE_1_kD,
+      IntakeConstants.INTAKE_1_kFF);
+    intake1.setInverted(true);
+    intake1Config.idleMode(IdleMode.kCoast);
+    intake1Config.smartCurrentLimit(25, 40, 1000);
+    intake1Config.apply(intake1PIDConfig);
+    intake1.configure(intake1Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+      //creates and applies the configurations for the motor Intake2 and it's PID configurator
+    intake2Config = new SparkMaxConfig();
+    intake2PIDConfig = new ClosedLoopConfig();
     intake2 = new SparkMax(IntakeConstants.INTAKE_2_MOTOR, SparkLowLevel.MotorType.kBrushless);
-    intake1Controller.pidf(IntakeConstants.INTAKE_1_kP, 
-                           IntakeConstants.INTAKE_1_kI, 
-                           IntakeConstants.INTAKE_1_kD,
-                           IntakeConstants.INTAKE_1_kFF);
-    intake2Controller.pidf(IntakeConstants.INTAKE_2_kP, 
+    intake2PIDConfig.pidf(IntakeConstants.INTAKE_2_kP, 
                            IntakeConstants.INTAKE_2_kI, 
                            IntakeConstants.INTAKE_2_kD,
                            IntakeConstants.INTAKE_2_kFF);
-    intake1.setInverted(true);
     intake2.setInverted(true);
-    intake1Config.idleMode(IdleMode.kCoast);
     intake2Config.idleMode(IdleMode.kCoast);
-    intake1Config.smartCurrentLimit(25, 40, 1000);
     intake2Config.smartCurrentLimit(25, 40, 1000);
-    intake1Config.apply(intake1Controller);
-    intake2Config.apply(intake2Controller);
+    intake2PIDConfig.apply(intake2PIDConfig);
+    intake2.configure(intake2Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    //defines the analog sensor
     m_DistanceSensor = intake1.getAnalog();
-    intake1.configure(intake1Config, null, null);
-    intake2.configure(intake2Config, null, null);
 
     if (Preferences.getBoolean("IntakeSideWheels", false)) {
       intakeSideLeft = new SparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_LEFT, MotorType.kBrushless);
@@ -105,7 +116,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   /**
-   * sets the intakes speed
+   * sets the intakes speed. If the IntakeSideWheels preference is set to false, you can put whatever number you want in as IntakeSideRunSpeed
    * <p>
    * uses percentage of full power
    * 
@@ -126,8 +137,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
   // intakeSubsystem.function(0.5);
   public void setVelocity(double velocity) {
-     intake1Controller.setReference(velocity, SparkMax.ControlType.kVelocity);
-     intake2Controller.setReference(velocity, SparkMax.ControlType.kVelocity);
+    intake1.getClosedLoopController().setReference(velocity, ControlType.kVelocity);
+    intake2.getClosedLoopController().setReference(velocity, ControlType.kVelocity);
   }
 
   public void intakeSideWheels(double sideWheelRunSpeed) {
