@@ -4,16 +4,12 @@
 
 package frc.robot.commands.goToPose;
 
-import static frc.robot.settings.Constants.DriveConstants.DEFAUL_PATH_CONSTRAINTS;
+import static frc.robot.settings.Constants.DriveConstants.DEFAULT_PATH_CONSTRAINTS;
 
-import java.io.IOException;
 import java.util.function.BooleanSupplier;
-
-import org.json.simple.parser.ParseException;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -33,14 +29,9 @@ public class GoToAmp extends Command {
   @Override
   public void initialize() {
     // PathPlannerPath ampPath = PathPlannerPath.fromPathFile("goToAmp");
-    try{
     PathPlannerPath ampPath = PathPlannerPath.fromPathFile("ScoreAmp");
-    actualCommand = AutoBuilder.pathfindThenFollowPath(ampPath, DEFAUL_PATH_CONSTRAINTS);
+    actualCommand = AutoBuilder.pathfindThenFollowPath(ampPath, DEFAULT_PATH_CONSTRAINTS);
     actualCommand.initialize();
-    }
-  catch(IOException e){System.out.println("got ioException trying to load paths");}
-  catch(ParseException i){System.out.println("got ParseException trying to load paths");}
-  catch(FileVersionException o){System.out.println("got FileVerionException trying to load paths");}
   }
 
   // Called every time the scheduler runs while the command is scheduled.

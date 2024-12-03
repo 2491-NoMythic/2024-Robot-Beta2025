@@ -209,7 +209,7 @@ public final class Constants {
     public static final double k_BALANCE_TOLORANCE_DEGREES = 10.0;
     public static final double k_BALANCE_TOLORANCE_DEG_PER_SEC = 1;
 
-    public static final PathConstraints DEFAUL_PATH_CONSTRAINTS = new PathConstraints(2, 1.5, Math.toRadians(360), Math.toRadians(360));
+    public static final PathConstraints DEFAULT_PATH_CONSTRAINTS = new PathConstraints(2, 1.5, Math.toRadians(360), Math.toRadians(360));
 
     public static final double k_PICKUP_NOTE_ta_P = 1;
     public static final double k_PICKUP_NOTE_ta_I = 0;
@@ -373,7 +373,7 @@ public static final int INTAKE_SIDE_MOTOR_LEFT = 25;
   public static final double INTAKE_2_kP = 0.00007;
   public static final double INTAKE_2_kI = 0;//0.7;
   public static final double INTAKE_2_kD = 0;//0.002;
-  public static final double INTAKE_2_kFF = 0.00009;
+  public static final double INTAKE_2_kF = 0.00009;
 }
 public static final class CTREConfigs {
   public TalonFXConfiguration driveMotorConfig;
@@ -414,12 +414,11 @@ public static final class CTREConfigs {
       driveMotorConfig.Voltage.PeakForwardVoltage = 12;
       driveMotorConfig.Voltage.PeakReverseVoltage = -12;
       driveMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-      driveMotorConfig.CurrentLimits.SupplyCurrentLimit = 50;
+      driveMotorConfig.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVE_CURRENT_LIMIT;
       driveMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
       driveMotorConfig.CurrentLimits.StatorCurrentLimitEnable = false;
-      driveMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = DriveConstants.DRIVE_CURRENT_LIMIT;
-      driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = 0.8;
-
+      driveMotorConfig.CurrentLimits.SupplyCurrentThreshold = 50;
+      driveMotorConfig.CurrentLimits.SupplyTimeThreshold = 0.8;
 
       //  Steer encoder.
       steerEncoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;

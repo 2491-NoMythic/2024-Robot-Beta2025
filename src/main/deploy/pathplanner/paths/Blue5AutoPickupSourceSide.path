@@ -1,5 +1,5 @@
 {
-  "version": "2025.0",
+  "version": 1.0,
   "waypoints": [
     {
       "anchor": {
@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 4.829358829667969,
-        "y": 1.266823878931358
+        "y": 1.2668238789313584
       },
       "isLocked": false,
       "linkedName": "SourceSideBlueShoot"
@@ -31,29 +31,28 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.55,
-      "rotationDegrees": 163.0
+      "rotationDegrees": 163.0,
+      "rotateFast": true
     }
   ],
   "constraintZones": [],
-  "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.5,
     "maxAcceleration": 2.3,
     "maxAngularVelocity": 650.0,
-    "maxAngularAcceleration": 350.0,
-    "nominalVoltage": 12.0,
-    "unlimited": false
+    "maxAngularAcceleration": 350.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 157.5572466347056
+    "rotation": 157.5572466347056,
+    "rotateFast": false
   },
   "reversed": false,
   "folder": null,
-  "idealStartingState": {
-    "velocity": 0,
-    "rotation": 0.0
+  "previewStartingState": {
+    "rotation": 161.56505117707812,
+    "velocity": 0
   },
   "useDefaultConstraints": true
 }

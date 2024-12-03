@@ -7,10 +7,13 @@ import pabeles.concurrency.IntOperatorTask.Max;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkAbsoluteEncoder;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.SparkAbsoluteEncoder.Type;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,34 +22,27 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import com.revrobotics.spark.SparkAbsoluteEncoder;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.AbsoluteEncoderConfig;
-import com.revrobotics.spark.config.AbsoluteEncoderConfigAccessor;
-import com.revrobotics.spark.SparkBase.ControlType;
 import static frc.robot.settings.Constants.ShooterConstants.*;
 import static frc.robot.settings.Constants.ShooterConstants.AdjustEquation.*;
 import static frc.robot.settings.Constants.LOOPS_VALID_FOR_SHOT;
 
 public class AngleShooterSubsystem extends SubsystemBase {
-	SparkMax pitchMotor;
-	SparkMaxConfig pitchMotorConfig;
-	ClosedLoopConfig pitchPIDConfig;
+	CANSparkMax pitchMotor;
+	SparkPIDController pitchPID;
 	SparkAbsoluteEncoder absoluteEncoder;
-	AbsoluteEncoderConfig absoluteEncoderConfig;
-	FeedbackSensor absoluteEncoderTest;
 	double shootingSpeed = ShooterConstants.SHOOTING_SPEED_MPS;
-	double zeroOffset;
 	public static Pose2d dtvalues;
 	public static ChassisSpeeds DTChassisSpeeds;
 	public double desiredZeroOffset;
 	int runsValid;
 	double speakerDistGlobal;
-
+	Field2d offsetSpeakerLocationPose = new Field2d();
+	
 	public AngleShooterSubsystem() {
+		SmartDashboard.putData("offsetSpeakerPose", offsetSpeakerLocationPose);
 		
 		SmartDashboard.putNumber("CALLIBRATION/redShooterX", Field.CALCULATED_SHOOTER_RED_SPEAKER_X);
 		SmartDashboard.putNumber("CALLIBRATION/blueShooterX", Field.CALCULATED_SHOOTER_BLUE_SPEAKER_X);
@@ -54,31 +50,27 @@ public class AngleShooterSubsystem extends SubsystemBase {
 		SmartDashboard.putNumber("CALLIBRATION/redY", Field.CALCULATED_RED_SPEAKER_Y);
 
 		runsValid = 0;
-		//creates and applies configurations for the SparkMax Motor that controls the shooter's angle
-		pitchMotorConfig = new SparkMaxConfig();
-		pitchMotor = new SparkMax(PITCH_MOTOR_ID, MotorType.kBrushless);
+		pitchMotor = new CANSparkMax(PITCH_MOTOR_ID, MotorType.kBrushless);
+		pitchMotor.restoreFactoryDefaults();
 		pitchMotor.setInverted(true);
-		pitchMotorConfig.idleMode(IdleMode.kBrake);
+		pitchMotor.setIdleMode(IdleMode.kBrake);
+		absoluteEncoder = pitchMotor.getAbsoluteEncoder(Type.kDutyCycle);
+		absoluteEncoder.setPositionConversionFactor(360);
+		absoluteEncoder.setInverted(true);
 		if(Preferences.getBoolean("CompBot", false)) {
-			zeroOffset = CompBotZeroOffset;
+			absoluteEncoder.setZeroOffset(CompBotZeroOffset);
 		} else {
-			zeroOffset = PracBotZeroOffset;
+			absoluteEncoder.setZeroOffset(PracBotZeroOffset);
 		}
-		absoluteEncoderConfig.zeroOffset(zeroOffset);
-		//creates and applies configurations for the connected Absolute Encoder
-		absoluteEncoder = pitchMotor.getAbsoluteEncoder();
-		absoluteEncoderConfig = new AbsoluteEncoderConfig();
-		absoluteEncoderConfig.positionConversionFactor(360);
-		absoluteEncoderConfig.inverted(true);
-		pitchMotorConfig.apply(absoluteEncoderConfig);
-		//creates and applies configurations for the onboard Closed Loop (PID) controller
-		pitchPIDConfig = new ClosedLoopConfig();
-		pitchPIDConfig.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
-		pitchPIDConfig.pid(
-			ANGLE_SHOOTER_POWER_KP,
-			ANGLE_SHOOTER_POWER_KI,
-			ANGLE_SHOOTER_POWER_KD);
-		pitchPIDConfig.outputRange(pitchMinOutput, pitchMaxOutput);
+
+
+		pitchPID = pitchMotor.getPIDController();
+		pitchPID.setFeedbackDevice(absoluteEncoder);
+		pitchPID.setP(ANGLE_SHOOTER_POWER_KP);
+		pitchPID.setI(ANGLE_SHOOTER_POWER_KI);
+		pitchPID.setD(ANGLE_SHOOTER_POWER_KD);
+		pitchPID.setOutputRange(pitchMinOutput, pitchMaxOutput);
+		pitchMotor.burnFlash();
 	}
 	/**
 	 * sets the setpoint for the pitch motor's onboard PID loop to be this angle. It should make the whole indexer and shooter snap to that angle. 
@@ -94,14 +86,10 @@ public class AngleShooterSubsystem extends SubsystemBase {
 		}
 		if(degrees>MaxAngle) {degrees = COMP_MAXIMUM_SHOOTER_ANGLE;}
 		if(degrees<MINIMUM_SHOOTER_ANGLE) {degrees = MINIMUM_SHOOTER_ANGLE;}
-		pitchPIDConfig.pidf(
-			ANGLE_SHOOTER_POWER_KP,
-			ANGLE_SHOOTER_POWER_KI,
-			ANGLE_SHOOTER_POWER_KD,
-			Math.cos(Math.toRadians(degrees))*ShooterConstants.pitchFeedForward);
-		pitchMotor.getClosedLoopController().setReference(
+		pitchPID.setFF(Math.cos(Math.toRadians(degrees))*ShooterConstants.pitchFeedForward);
+		pitchPID.setReference(
 			degrees,
-			ControlType.kPosition
+			CANSparkMax.ControlType.kPosition
 		);
 	}
 	/**
@@ -116,7 +104,7 @@ public class AngleShooterSubsystem extends SubsystemBase {
 	 * stops the indexer immediately
 	 */
 	public void stop() {
-		pitchMotor.getClosedLoopController().setReference(0, ControlType.kCurrent);
+		pitchPID.setReference(0, ControlType.kCurrent);
 	}
 	/**
 	 * @return
@@ -184,7 +172,7 @@ public class AngleShooterSubsystem extends SubsystemBase {
 			offsetSpeakerX = Field.SHOOTER_RED_SPEAKER_X - targetOffset.getX();
 			offsetSpeakerY = Field.RED_SPEAKER_Y - targetOffset.getY();
 		} else {
-			offsetSpeakerX = Field.SHOOTER_BLUE_SPEAKER_X - targetOffset.getX();
+			offsetSpeakerX = Field.SHOOTER_BLUE_SPEAKER_X + targetOffset.getX();
 			offsetSpeakerY = Field.BLUE_SPEAKER_Y - targetOffset.getY();
 		}
 		double offsetDeltaX = Math.abs(dtvalues.getX() - offsetSpeakerX);
@@ -192,8 +180,9 @@ public class AngleShooterSubsystem extends SubsystemBase {
 		double offsetSpeakerdist = Math.sqrt(Math.pow(offsetDeltaX, 2) + Math.pow(offsetDeltaY, 2));
 		offsetSpeakerdist = offsetSpeakerdist+0.127; //to compensate for the pivot point of the shooter bieng offset from the center of the robot
 		SmartDashboard.putString("offset amount", targetOffset.toString());
-		SmartDashboard.putString("offset speaker location",
-		new Translation2d(offsetSpeakerX, offsetSpeakerY).toString());
+		Translation2d offsetSpeakerLocation = new Translation2d(offsetSpeakerX, offsetSpeakerY);
+		SmartDashboard.putString("offset speaker location", offsetSpeakerLocation.toString());
+		offsetSpeakerLocationPose.setRobotPose(new Pose2d(offsetSpeakerLocation, new Rotation2d(0)));
 		// getting desired robot angle
 		double totalOffsetDistToSpeaker = Math
 				.sqrt(Math.pow(offsetSpeakerdist, 2) + Math.pow(Field.SPEAKER_Z - ShooterConstants.SHOOTER_HEIGHT, 2));
@@ -342,7 +331,7 @@ public class AngleShooterSubsystem extends SubsystemBase {
 		// SmartDashboard.putNumber("ANGLE SHOOTER shooter angle encoder position", absoluteEncoder.getPosition()*360);
 		SmartDashboard.putNumber("ANGLE SHOOTER absolute encoder value", absoluteEncoder.getPosition());
 		// desiredZeroOffset = SmartDashboard.getNumber("ANGLE SHOOTER encoder zero offset", absoluteEncoder.getZeroOffset());
-		SmartDashboard.putNumber("ANGLE SHOOTER encoder zero offset", zeroOffset);
+		SmartDashboard.putNumber("ANGLE SHOOTER encoder zero offset", absoluteEncoder.getZeroOffset());
 
 		SmartDashboard.putNumber("ANGLE SHOOTER speaker angle error", calculateSpeakerAngleDifference());
 

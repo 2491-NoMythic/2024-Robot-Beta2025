@@ -1,5 +1,5 @@
 {
-  "version": "2025.0",
+  "version": 1.0,
   "waypoints": [
     {
       "anchor": {
@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.996663278517062,
-        "y": 3.925284994640962
+        "x": 7.870561969485848,
+        "y": 4.006515899231621
       },
       "isLocked": false,
       "linkedName": "CollectNote3Blue"
@@ -31,29 +31,25 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1.0,
-      "rotationDegrees": 164.74488129694225
+      "rotationDegrees": 164.74488129694225,
+      "rotateFast": false
     }
   ],
   "constraintZones": [],
-  "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
-    "nominalVoltage": 12.0,
-    "unlimited": false
+    "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 166.2637316943774
+    "rotation": 166.2637316943774,
+    "rotateFast": false
   },
   "reversed": false,
   "folder": "to shooting pos",
-  "idealStartingState": {
-    "velocity": 0,
-    "rotation": 0.0
-  },
+  "previewStartingState": null,
   "useDefaultConstraints": false
 }

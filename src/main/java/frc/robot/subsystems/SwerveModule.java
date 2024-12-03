@@ -98,7 +98,7 @@ public class SwerveModule {
    * @return The current encoder angle of the steer motor.
    */
   public Rotation2d getRotation() {
-    return Rotation2d.fromRotations(MathUtil.inputModulus(m_steerMotor.getPosition().getValueAsDouble(), -0.5, 0.5));
+    return Rotation2d.fromRotations(MathUtil.inputModulus(m_steerMotor.getPosition().getValue(), -0.5, 0.5));
   }
   /**
    * Returns the target angle of the wheel.
@@ -112,7 +112,7 @@ public class SwerveModule {
  */
   public double findOffset() {
     return MathUtil.inputModulus(
-      (m_steerEncoder.getPosition().getValueAsDouble() + m_steerEncoderOffset.getRotations()),
+      (m_steerEncoder.getPosition().getValue()+m_steerEncoderOffset.getRotations()),
       -0.5,
       0.5);
   }
@@ -128,14 +128,14 @@ public class SwerveModule {
    * @return The current velocity of the drive motor in meters/second.
    */
   public double getSpeedMetersPerSecond() {
-    return (m_driveMotor.getVelocity().getValueAsDouble() * DriveConstants.DRIVETRAIN_ROTATIONS_TO_METERS);
+    return (m_driveMotor.getVelocity().getValue() * DriveConstants.DRIVETRAIN_ROTATIONS_TO_METERS);
   }
   /**
    * Returns the current encoder distance of the drive motor.
    * @return The current distance of the drive motor in meters.
    */
   public double getDriveDistanceMeters() {
-    return (m_driveMotor.getPosition().getValueAsDouble() * DriveConstants.DRIVETRAIN_ROTATIONS_TO_METERS);
+    return (m_driveMotor.getPosition().getValue() * DriveConstants.DRIVETRAIN_ROTATIONS_TO_METERS);
   }
 
   public TalonFX getDriveMotor(){

@@ -1,5 +1,5 @@
 {
-  "version": "2025.0",
+  "version": 1.0,
   "waypoints": [
     {
       "anchor": {
@@ -20,7 +20,7 @@
         "y": 6.25866404885963
       },
       "prevControl": {
-        "x": 1.780474912301176,
+        "x": 1.7804749123011758,
         "y": 6.526760440908269
       },
       "nextControl": null,
@@ -30,12 +30,10 @@
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "New Event Marker",
       "waypointRelativePos": 0.75,
-      "endWaypointRelativePos": null,
       "command": {
         "type": "parallel",
         "data": {
@@ -55,19 +53,18 @@
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
-    "nominalVoltage": 12.0,
-    "unlimited": false
+    "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -154.85521436932123
+    "rotation": -154.8552143693212,
+    "rotateFast": false
   },
   "reversed": false,
   "folder": "Initial Shots",
-  "idealStartingState": {
-    "velocity": 0,
-    "rotation": 0.0
+  "previewStartingState": {
+    "rotation": 146.915147071265,
+    "velocity": 0
   },
   "useDefaultConstraints": false
 }

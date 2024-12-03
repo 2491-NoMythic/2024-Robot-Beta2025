@@ -1,7 +1,7 @@
 package frc.robot.helpers;
 
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
@@ -20,7 +20,7 @@ public class MotorLogger {
         velocity = new DoubleLogEntry(log, path + "/velocity");
     }
 
-    public void log(SparkMax motor) {
+    public void log(CANSparkMax motor) {
         current.append(motor.getOutputCurrent());
         voltage.append(motor.getAppliedOutput() * motor.getBusVoltage());
         velocity.append(motor.getEncoder().getVelocity()/60);

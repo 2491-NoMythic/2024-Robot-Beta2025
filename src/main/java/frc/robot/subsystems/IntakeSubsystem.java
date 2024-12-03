@@ -1,32 +1,22 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license https://software-metadata.revrobotics.com/REVLib-2024.jsonfile in the root directory of this project.
+// the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
 
-import static frc.robot.settings.Constants.ShooterConstants.CURRENT_LIMIT;
-
 import com.ctre.phoenix6.signals.ControlModeValue;
-import com.revrobotics.spark.SparkAnalogSensor;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkLowLevel;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.AnalogSensorConfig;
-import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.SignalsConfig;
-import com.revrobotics.spark.config.SparkBaseConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.AlternateEncoderConfig.Type;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.MotorFeedbackSensor;
+import com.revrobotics.SparkAnalogSensor;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.SparkAnalogSensor.Mode;
+import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -36,16 +26,12 @@ import frc.robot.settings.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new Intake. */
-  SparkMax intake1;
-  ClosedLoopConfig intake1PIDConfig;
-  SparkMaxConfig intake1Config;
-  SparkMax intake2;
-  ClosedLoopConfig intake2PIDConfig;
-  SparkMaxConfig intake2Config;
-  SparkMax intakeSideLeft;
-  SparkMaxConfig intakeSideLeftConfig;
-  SparkMax intakeSideRight;
-  SparkMaxConfig intakeSideRightConfig;
+  CANSparkMax intake1;
+  SparkPIDController intake1Controller;
+  CANSparkMax intake2;
+  SparkPIDController intake2Controller;
+  CANSparkMax intakeSideLeft;
+  CANSparkMax intakeSideRight;
   SparkAnalogSensor m_DistanceSensor;
   boolean isNoteHeld;
 
@@ -57,56 +43,47 @@ public class IntakeSubsystem extends SubsystemBase {
   double intakeRunSpeed;
 
   public IntakeSubsystem() {
-    //creates and applies the configurations for the motor Intake1 and it's PID configurator
-    intake1PIDConfig = new ClosedLoopConfig();
-    intake1Config = new SparkMaxConfig();
-    intake1 = new SparkMax(IntakeConstants.INTAKE_1_MOTOR, SparkLowLevel.MotorType.kBrushless);
-    intake1PIDConfig.pidf(
-      IntakeConstants.INTAKE_1_kP, 
-      IntakeConstants.INTAKE_1_kI, 
-      IntakeConstants.INTAKE_1_kD,
-      IntakeConstants.INTAKE_1_kFF);
+    intake1 = new CANSparkMax(IntakeConstants.INTAKE_1_MOTOR, MotorType.kBrushless);
+    intake2 = new CANSparkMax(IntakeConstants.INTAKE_2_MOTOR, MotorType.kBrushless);
+    intake1.restoreFactoryDefaults();
+    intake2.restoreFactoryDefaults();
+    intake1Controller = intake1.getPIDController();
+    intake2Controller = intake2.getPIDController();
+      intake1Controller.setP(IntakeConstants.INTAKE_1_kP);
+      intake1Controller.setI(IntakeConstants.INTAKE_1_kI);
+      intake1Controller.setD(IntakeConstants.INTAKE_1_kD);
+      intake1Controller.setFF(IntakeConstants.INTAKE_1_kFF);
+      intake2Controller.setP(IntakeConstants.INTAKE_2_kP);
+      intake2Controller.setI(IntakeConstants.INTAKE_2_kI);
+      intake2Controller.setD(IntakeConstants.INTAKE_2_kD);
+      intake2Controller.setFF(IntakeConstants.INTAKE_2_kF);
     intake1.setInverted(true);
-    intake1Config.idleMode(IdleMode.kCoast);
-    intake1Config.smartCurrentLimit(25, 40, 1000);
-    intake1Config.apply(intake1PIDConfig);
-    intake1.configure(intake1Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-      //creates and applies the configurations for the motor Intake2 and it's PID configurator
-    intake2Config = new SparkMaxConfig();
-    intake2PIDConfig = new ClosedLoopConfig();
-    intake2 = new SparkMax(IntakeConstants.INTAKE_2_MOTOR, SparkLowLevel.MotorType.kBrushless);
-    intake2PIDConfig.pidf(IntakeConstants.INTAKE_2_kP, 
-                           IntakeConstants.INTAKE_2_kI, 
-                           IntakeConstants.INTAKE_2_kD,
-                           IntakeConstants.INTAKE_2_kFF);
     intake2.setInverted(true);
-    intake2Config.idleMode(IdleMode.kCoast);
-    intake2Config.smartCurrentLimit(25, 40, 1000);
-    intake2PIDConfig.apply(intake2PIDConfig);
-    intake2.configure(intake2Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    //defines the analog sensor
-    m_DistanceSensor = intake1.getAnalog();
+    intake1.setIdleMode(IdleMode.kCoast);
+    intake2.setIdleMode(IdleMode.kCoast);
+    intake1.setSmartCurrentLimit(25, 40, 1000);
+    intake2.setSmartCurrentLimit(25, 40, 1000);
+    intake1.burnFlash();
+    intake2.burnFlash();
 
     if (Preferences.getBoolean("IntakeSideWheels", false)) {
-      intakeSideLeft = new SparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_LEFT, MotorType.kBrushless);
-      intakeSideRight = new SparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_RIGHT, MotorType.kBrushless);
+      intakeSideLeft = new CANSparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_LEFT, MotorType.kBrushless);
+      intakeSideRight = new CANSparkMax(IntakeConstants.INTAKE_SIDE_MOTOR_RIGHT, MotorType.kBrushless);
+      intakeSideLeft.restoreFactoryDefaults();
+      intakeSideRight.restoreFactoryDefaults();
       intakeSideLeft.setInverted(false);
       intakeSideRight.setInverted(true);
-      intakeSideLeftConfig.idleMode(IdleMode.kCoast);
-      intakeSideRightConfig.idleMode(IdleMode.kCoast);
-      intakeSideLeftConfig.smartCurrentLimit(25, 40, 1000);
-      intakeSideRightConfig.smartCurrentLimit(25, 40, 1000);
-      intakeSideLeftConfig.encoder.positionConversionFactor(1);
-      intakeSideRightConfig.encoder.positionConversionFactor(1);
-      intakeSideLeft.configure(intakeSideLeftConfig, null, null);
-      intakeSideRight.configure(intakeSideRightConfig, null, null);
+      intakeSideLeft.setIdleMode(IdleMode.kCoast);
+      intakeSideRight.setIdleMode(IdleMode.kCoast);
+      intakeSideLeft.setSmartCurrentLimit(25, 40, 1000);
+      intakeSideRight.setSmartCurrentLimit(25, 40, 1000);
+      intakeSideRight.getEncoder().setPositionConversionFactor(1);
+      intakeSideLeft.getEncoder().setPositionConversionFactor(1);
+      intakeSideLeft.burnFlash();
+      intakeSideRight.burnFlash();
+      //intakeSideRight.getPIDController().setReference(intakeRunSpeed, CANSparkMax.ControlType.kVelocity)
     }
-
-    if (Preferences.getBoolean("CompBot", true)) {
-      m_DistanceSensor = intakeSideLeft.getAnalog();
-    } else {
-      m_DistanceSensor = intakeSideLeft.getAnalog();
-    }
+    m_DistanceSensor = intakeSideLeft.getAnalog(Mode.kAbsolute);
 
     DataLog log = DataLogManager.getLog();
     motorLogger1 = new MotorLogger(log, "/intake/motor1");
@@ -116,7 +93,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   /**
-   * sets the intakes speed. If the IntakeSideWheels preference is set to false, you can put whatever number you want in as IntakeSideRunSpeed
+   * sets the intakes speed
    * <p>
    * uses percentage of full power
    * 
@@ -131,14 +108,10 @@ public class IntakeSubsystem extends SubsystemBase {
       intakeSideRight.set(intakeSideRunSpeed);
     }
   }
-  public void function(double variable){
-    intake1.set(variable);
-  }
 
-  // intakeSubsystem.function(0.5);
   public void setVelocity(double velocity) {
-    intake1.getClosedLoopController().setReference(velocity, ControlType.kVelocity);
-    intake2.getClosedLoopController().setReference(velocity, ControlType.kVelocity);
+    intake1Controller.setReference(velocity, CANSparkMax.ControlType.kVelocity);
+    intake2Controller.setReference(velocity, CANSparkMax.ControlType.kVelocity);
   }
 
   public void intakeSideWheels(double sideWheelRunSpeed) {
@@ -174,24 +147,6 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
-  /**
-   * uses the distance sensor inside the indexer to tell if there is a note fully
-   * inside the indexer
-   * 
-   * @return if the sensor sees something within it's range in front of it
-   */
-  public boolean isNoteSeen() {
-    return m_DistanceSensor.getVoltage() < 2;
-  }
-
-  public boolean isNoteHeld() {
-    return isNoteHeld;
-  }
-
-  public void setNoteHeld(boolean held) {
-    isNoteHeld = held;
-  }
-
   @Override
   public void periodic() {
     SmartDashboard.putNumber("voltage sensor output", m_DistanceSensor.getVoltage());
@@ -200,9 +155,7 @@ public class IntakeSubsystem extends SubsystemBase {
     motorLogger1.log(intake1);
     motorLogger2.log(intake2);
     logDistance.append(m_DistanceSensor.getVoltage());
-    logNoteIn.append(isNoteSeen());
-    SmartDashboard.putBoolean("is note in", isNoteSeen());
-    SmartDashboard.putBoolean("is note held", isNoteHeld());
-    RobotState.getInstance().IsNoteHeld = isNoteSeen();
+    logNoteIn.append(RobotState.getInstance().isNoteSeen());
+    RobotState.getInstance().intakeSensorVoltage = m_DistanceSensor.getVoltage();
   }
 }
