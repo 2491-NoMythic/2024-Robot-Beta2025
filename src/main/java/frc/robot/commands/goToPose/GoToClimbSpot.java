@@ -6,12 +6,18 @@ package frc.robot.commands.goToPose;
 
 import static frc.robot.settings.Constants.DriveConstants.DEFAULT_PATH_CONSTRAINTS;
 
+import java.io.IOException;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import org.json.simple.parser.ParseException;
+
+
 
 public class GoToClimbSpot extends Command {
   Command actualCommand;
@@ -28,6 +34,7 @@ public class GoToClimbSpot extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    try {
     PathPlannerPath climbMidRPath = PathPlannerPath.fromPathFile("climbMidR");
     PathPlannerPath climbMidMPath = PathPlannerPath.fromPathFile("climbMidM");
     PathPlannerPath climbMidLPath = PathPlannerPath.fromPathFile("climbMidL");
@@ -79,6 +86,10 @@ public class GoToClimbSpot extends Command {
     }
 
   actualCommand.initialize();
+  }
+  catch(IOException e){System.out.println("got ioException trying to load paths");}
+  catch(ParseException i){System.out.println("got ParseException trying to load paths");}
+  catch(FileVersionException o){System.out.println("got FileVerionException trying to load paths");}
 }
 
   // Called every time the scheduler runs while the command is scheduled.

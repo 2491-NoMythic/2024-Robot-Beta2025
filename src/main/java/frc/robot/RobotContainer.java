@@ -8,6 +8,7 @@ import static frc.robot.settings.Constants.PS4Driver.*;
 import static frc.robot.settings.Constants.ShooterConstants.PRAC_AMP_RPS;
 import static frc.robot.settings.Constants.ShooterConstants.LONG_SHOOTING_RPS;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -18,11 +19,9 @@ import static frc.robot.settings.Constants.DriveConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
-
 import frc.robot.commands.AimShooter;
 import frc.robot.commands.AimRobotMoving;
 import frc.robot.commands.CollectNote;
@@ -50,7 +49,6 @@ import frc.robot.commands.WaitUntil;
 
 import frc.robot.commands.NamedCommands.InitialShot;
 import frc.robot.commands.NamedCommands.ShootNote;
-import frc.robot.commands.NamedCommands.AutoGroundIntake;
 import frc.robot.commands.goToPose.GoToAmp;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.Lights;
@@ -486,29 +484,31 @@ public class RobotContainer {
   }
 
   private void configureDriveTrain() {
-    AutoBuilder.configureHolonomic(
+    try{
+    AutoBuilder.configure(
                 driveTrain::getPose, // Pose2d supplier
                 driveTrain::resetOdometry, // Pose2d consumer, used to reset odometry at the beginning of auto
                 driveTrain::getChassisSpeeds,
-                driveTrain::drive,
-                new HolonomicPathFollowerConfig(
-                    new PIDConstants(
+                (speeds) -> driveTrain.drive(speeds),
+                new PPHolonomicDriveController(
+                    new com.pathplanner.lib.config.PIDConstants(
                         k_XY_P,
                         k_XY_I,
                         k_XY_D), // PID constants to correct for translation error (used to create the X
                                  // and Y PID controllers)
-                    new PIDConstants(
+                    new com.pathplanner.lib.config.PIDConstants(
                         k_THETA_P,
                         k_THETA_I,
-                        k_THETA_D), // PID constants to correct for rotation error (used to create the
+                        k_THETA_D)// PID constants to correct for rotation error (used to create the
                                     // rotation controller)
-                    4, //max module speed //TODO find actual values
-                    new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0).getNorm(), //drive base radius
-                    new ReplanningConfig()
                 ),
+                RobotConfig.fromGUISettings(),
                 ()->DriverStation.getAlliance().get().equals(Alliance.Red),
                 driveTrain
     );
+    }
+    catch(org.json.simple.parser.ParseException a){System.out.println("got ParseException trying to configure AutoBuilder");}
+    catch(IOException b){System.out.println("got IOException thrown trying to configure autobuilder");}
   }
 
   private Pose2d getAmpShotPose(Alliance currentAlliance) {
