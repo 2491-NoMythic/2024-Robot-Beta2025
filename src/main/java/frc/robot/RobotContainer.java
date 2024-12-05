@@ -198,7 +198,7 @@ public class RobotContainer {
     OppositeStageShotSup = ()->operatorController.getCircleButton()||driverController.getCircleButton();
     OverStagePassSup = operatorController::getL1Button;
     CenterAmpPassSup = operatorController::getL2Button;
-    AutoPickupSup = ()->operatorController.getTouchpad()||driverController.getTouchpad();
+    AutoPickupSup = ()->operatorController.getTouchpadButton()||driverController.getTouchpadButton();
     zeroSup = ()->0;
     falseSup = ()->false;
     //discontinued buttons:
