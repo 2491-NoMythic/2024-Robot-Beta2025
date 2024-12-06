@@ -373,7 +373,7 @@ public class RobotContainer {
       new Trigger(ShooterUpManualSup).whileTrue(new AngleShooter(angleShooterSubsystem, ()->ShooterConstants.PRAC_MAXIMUM_SHOOTER_ANGLE));
       SmartDashboard.putData("Manual Angle Shooter Up", new AngleShooter(angleShooterSubsystem, ()->ShooterConstants.PRAC_MAXIMUM_SHOOTER_ANGLE));
     }
-    if(indexerExists) {
+    if(indexerExists&&intakeExists) {
       new Trigger(ManualShootSup).whileTrue(new ManualShoot(indexer, driverController::getPOV, intake));
     }
     if(climberExists) {
@@ -580,7 +580,7 @@ public class RobotContainer {
       }
       NamedCommands.registerCommand("note isn't held", new WaitUntil(()->!RobotState.getInstance().isNoteSeen()));
     }
-    if(indexerExists&&shooterExists) {
+    if(indexerExists&&shooterExists&&angleShooterExists) {
       NamedCommands.registerCommand("initialShot", new InitialShot(shooter, indexer, 0.9, 0.1, angleShooterSubsystem));
       //the following command will both aim the robot at the speaker (with the AimRobotMoving), and shoot a note while aiming the shooter (with shootNote). As a race group, it ends
       //when either command finishes. the AimRobotMoving command will never finish, but the shootNote finishes when shootTime is reached.
@@ -592,6 +592,9 @@ public class RobotContainer {
         )));
       // NamedCommands.registerCommand("setFeedTrue", new InstantCommand(()->SmartDashboard.putBoolean("feedMotor", true)));
       // NamedCommands.registerCommand("setFeedFalse", new InstantCommand(()->SmartDashboard.putBoolean("feedMotor", false)));
+    }else {
+      NamedCommands.registerCommand("initialShot", new InstantCommand(()->System.out.println("could not create initialShot becuase one of its substems is not initialized")));
+      NamedCommands.registerCommand("autoShootNote", new InstantCommand(()->System.out.println("could not create autoShootNote becuase one of its substems is not initialized")));
     }
     if(angleShooterExists) {
       //the same command that we use during teleop, but all the buttons that would aim the shooter anywhere other than the speaker are set to false.
