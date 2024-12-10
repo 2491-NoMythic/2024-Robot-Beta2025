@@ -7,7 +7,6 @@ package frc.robot.settings;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -421,7 +420,7 @@ public static final class CTREConfigs {
       // driveMotorConfig.CurrentLimits.SupplyTimeThreshold = 0.8;
 
       //  Steer encoder.
-      steerEncoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+      steerEncoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
 
       // Pigeon 2.
       pigeon2Config.MountPose.MountPosePitch = 0;
