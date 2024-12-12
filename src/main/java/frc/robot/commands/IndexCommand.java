@@ -4,22 +4,14 @@
 
 package frc.robot.commands;
 
-import static frc.robot.settings.Constants.DriveConstants.MAX_VELOCITY_METERS_PER_SECOND;
-import static frc.robot.settings.Constants.ShooterConstants.PRAC_AMP_RPS;
 import static frc.robot.settings.Constants.ShooterConstants.HUMAN_PLAYER_RPS;
 import static frc.robot.settings.Constants.ShooterConstants.LONG_SHOOTING_RPS;
-import static frc.robot.settings.Constants.ShooterConstants.PASS_RPS;
-
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.settings.Constants.DriveConstants;
 import frc.robot.settings.Constants.Field;
 import frc.robot.settings.Constants.IndexerConstants;
-import frc.robot.settings.Constants.IntakeConstants;
 import frc.robot.settings.Constants.ShooterConstants;
 import frc.robot.subsystems.AngleShooterSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -27,7 +19,8 @@ import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.RobotState;
 import frc.robot.subsystems.ShooterSubsystem;
-
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 public class IndexCommand extends Command {
   BooleanSupplier revUpSupplier;
@@ -47,21 +40,27 @@ public class IndexCommand extends Command {
   BooleanSupplier subwooferAngleSup;
   BooleanSupplier farStageAngleSup;
   BooleanSupplier revToZeroSup;
-  BooleanSupplier intakeReverse; 
-  BooleanSupplier OverStagePassSup; 
-  BooleanSupplier OppositeStageShotSup; 
+  BooleanSupplier intakeReverse;
+  BooleanSupplier OverStagePassSup;
+  BooleanSupplier OppositeStageShotSup;
   boolean auto;
   double runsEmpty = 0;
   boolean idleReving;
 
   /**
-   * A command to manage the control of notes throughout the robot. This command controls the Intake, Shooter, and Indexer. If any of these preferences are turned off, the command should not be initialized. If 
-   * any of these subsytems are required in a different command, this command will not run during that command. This command controls: ground intake, rev'ing up the shooter if we are at a setpoint or auto-aiming, shooting if the shoot-if-ready button is pressed
-   * and all the subsytems think we have a good shot, and collecting notes from the source.
-   * <p>
-   * the buttons fed into this command that match the names of buttons fed into the AimRobotMoving command and the AimShooter command should match.
+   * A command to manage the control of notes throughout the robot. This command controls the
+   * Intake, Shooter, and Indexer. If any of these preferences are turned off, the command should
+   * not be initialized. If any of these subsytems are required in a different command, this command
+   * will not run during that command. This command controls: ground intake, rev'ing up the shooter
+   * if we are at a setpoint or auto-aiming, shooting if the shoot-if-ready button is pressed and
+   * all the subsytems think we have a good shot, and collecting notes from the source.
+   *
+   * <p>the buttons fed into this command that match the names of buttons fed into the
+   * AimRobotMoving command and the AimShooter command should match.
+   *
    * @param m_IndexerSubsystem indexer subsystem
-   * @param shootIfReadySupplier button to press to shoot if all subsystems think we have a good shot
+   * @param shootIfReadySupplier button to press to shoot if all subsystems think we have a good
+   *     shot
    * @param revUpSupplier same as the auto-aim supplier that starts the aimRobotMoving command
    * @param shooter shooter subsystem
    * @param intake intake subsystem
@@ -74,18 +73,36 @@ public class IndexCommand extends Command {
    * @param farStageAngleSup button to press to aim at the speaker from the far stage leg
    * @param operatorRevSup button to press to rev up the shooter slowly while driving
    * @param intakeReverse button to press to run the indexer backwards manually
-   * @param OverStagePassSup button to press to aim at the speaker from the opposite side of the stage (from the speaker)
-   * @param OppositeStageShotSup button to press to aim at the speaker from the opposite side of the stage (from the speaker)
+   * @param OverStagePassSup button to press to aim at the speaker from the opposite side of the
+   *     stage (from the speaker)
+   * @param OppositeStageShotSup button to press to aim at the speaker from the opposite side of the
+   *     stage (from the speaker)
    */
-  public IndexCommand(IndexerSubsystem m_IndexerSubsystem, BooleanSupplier shootIfReadySupplier, BooleanSupplier revUpSupplier, ShooterSubsystem shooter, IntakeSubsystem intake, DrivetrainSubsystem drivetrain, AngleShooterSubsystem angleShooterSubsystem, BooleanSupplier humanPlaySupplier, BooleanSupplier stageAngleSup, BooleanSupplier SubwooferSup, BooleanSupplier groundIntakeSup, BooleanSupplier farStageAngleSup, BooleanSupplier operatorRevSup, BooleanSupplier intakeReverse, BooleanSupplier OverStagePassSup, BooleanSupplier OppositeStageShotSup) {
+  public IndexCommand(
+      IndexerSubsystem m_IndexerSubsystem,
+      BooleanSupplier shootIfReadySupplier,
+      BooleanSupplier revUpSupplier,
+      ShooterSubsystem shooter,
+      IntakeSubsystem intake,
+      DrivetrainSubsystem drivetrain,
+      AngleShooterSubsystem angleShooterSubsystem,
+      BooleanSupplier humanPlaySupplier,
+      BooleanSupplier stageAngleSup,
+      BooleanSupplier SubwooferSup,
+      BooleanSupplier groundIntakeSup,
+      BooleanSupplier farStageAngleSup,
+      BooleanSupplier operatorRevSup,
+      BooleanSupplier intakeReverse,
+      BooleanSupplier OverStagePassSup,
+      BooleanSupplier OppositeStageShotSup) {
     this.m_Indexer = m_IndexerSubsystem;
-    this.shootIfReadySupplier = shootIfReadySupplier;//R2
-    this.revUpSupplier = revUpSupplier;//L2
+    this.shootIfReadySupplier = shootIfReadySupplier; // R2
+    this.revUpSupplier = revUpSupplier; // L2
     this.shooter = shooter;
     this.intake = intake;
     this.drivetrain = drivetrain;
     this.angleShooterSubsytem = angleShooterSubsystem;
-    this.humanPlayerSupplier = humanPlaySupplier;//R1
+    this.humanPlayerSupplier = humanPlaySupplier; // R1
     this.subwooferAngleSup = SubwooferSup;
     this.stageAngleSup = stageAngleSup;
     this.farStageAngleSup = farStageAngleSup;
@@ -111,23 +128,26 @@ public class IndexCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(DriverStation.isAutonomousEnabled()) {
+    if (DriverStation.isAutonomousEnabled()) {
       auto = true;
     } else {
       auto = false;
     }
     if (!RobotState.getInstance().isNoteSeen()) {
-      // intake.intakeYes(IntakeConstants.INTAKE_SPEED); // only code that runs the intake
-      if(runsEmpty<21) {runsEmpty++;}
-      if(runsEmpty>=20) {
+      // intake.intakeYes(IntakeConstants.INTAKE_SPEED); // only code that runs the
+      // intake
+      if (runsEmpty < 21) {
+        runsEmpty++;
+      }
+      if (runsEmpty >= 20) {
         idleReving = false;
         RobotState.getInstance().IsNoteHeld = false;
-        if(humanPlayerSupplier.getAsBoolean()) {
+        if (humanPlayerSupplier.getAsBoolean()) {
           m_Indexer.set(IndexerConstants.HUMAN_PLAYER_INDEXER_SPEED);
           shooter.setTargetVelocity(HUMAN_PLAYER_RPS, HUMAN_PLAYER_RPS, 40, 40);
           intake.intakeOff();
         } else {
-          if(!groundIntakeSup.getAsBoolean()) {
+          if (!groundIntakeSup.getAsBoolean()) {
             m_Indexer.off();
           }
           shooter.turnOff();
@@ -136,8 +156,11 @@ public class IndexCommand extends Command {
     } else {
       runsEmpty = 0;
       intake.intakeOff();
-      if(revUpSupplier.getAsBoolean()||stageAngleSup.getAsBoolean()||subwooferAngleSup.getAsBoolean()||OverStagePassSup.getAsBoolean()) {
-        if(OverStagePassSup.getAsBoolean()) {
+      if (revUpSupplier.getAsBoolean()
+          || stageAngleSup.getAsBoolean()
+          || subwooferAngleSup.getAsBoolean()
+          || OverStagePassSup.getAsBoolean()) {
+        if (OverStagePassSup.getAsBoolean()) {
           shooter.shootRPS(ShooterConstants.PASS_RPS);
           idleReving = false;
         } else {
@@ -145,7 +168,7 @@ public class IndexCommand extends Command {
           idleReving = false;
         }
       } else {
-        if (revToZeroSup.getAsBoolean()){ 
+        if (revToZeroSup.getAsBoolean()) {
           shooter.shootRPSWithCurrent(0, 20, 30);
           idleReving = false;
         } else {
@@ -154,33 +177,46 @@ public class IndexCommand extends Command {
         }
       }
       boolean indexer = false;
-      if(angleShooterSubsytem.validShot() && drivetrain.validShot() && shooter.validShot() && shooter.isReving() && !idleReving) {
+      if (angleShooterSubsytem.validShot()
+          && drivetrain.validShot()
+          && shooter.validShot()
+          && shooter.isReving()
+          && !idleReving) {
         if (shootIfReadySupplier.getAsBoolean()) {
           indexer = true;
         }
-      } 
-      if(SmartDashboard.getBoolean("feedMotor", false)) {
+      }
+      if (SmartDashboard.getBoolean("feedMotor", false)) {
         indexer = true;
       }
-      //if any of the setpoint buttons are pressed, AND we're trying to rev up, AND the shooter is rev'ed up, AND we say "shootIfReady", than turn on the indexer
-      if((stageAngleSup.getAsBoolean()||subwooferAngleSup.getAsBoolean()||farStageAngleSup.getAsBoolean()||OverStagePassSup.getAsBoolean()||OppositeStageShotSup.getAsBoolean())&&shooter.isReving()&&revUpSupplier.getAsBoolean()&& shooter.validShot()&&shootIfReadySupplier.getAsBoolean()) {
+      // if any of the setpoint buttons are pressed, AND we're trying to rev up, AND
+      // the shooter is
+      // rev'ed up, AND we say "shootIfReady", than turn on the indexer
+      if ((stageAngleSup.getAsBoolean()
+              || subwooferAngleSup.getAsBoolean()
+              || farStageAngleSup.getAsBoolean()
+              || OverStagePassSup.getAsBoolean()
+              || OppositeStageShotSup.getAsBoolean())
+          && shooter.isReving()
+          && revUpSupplier.getAsBoolean()
+          && shooter.validShot()
+          && shootIfReadySupplier.getAsBoolean()) {
         indexer = true;
       }
       if (indexer) {
-          m_Indexer.set(IndexerConstants.INDEXER_SHOOTING_POWER);
-          if(!RobotState.getInstance().isNoteSeen()) {
-            RobotState.getInstance().IsNoteHeld = false;
-          }
-       } else {
-          m_Indexer.off();
-       }
+        m_Indexer.set(IndexerConstants.INDEXER_SHOOTING_POWER);
+        if (!RobotState.getInstance().isNoteSeen()) {
+          RobotState.getInstance().IsNoteHeld = false;
+        }
+      } else {
+        m_Indexer.off();
+      }
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override

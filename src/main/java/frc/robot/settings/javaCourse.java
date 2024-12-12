@@ -1,5 +1,3 @@
 package frc.robot.settings;
 
-public class javaCourse {
-
-}
+public class javaCourse {}

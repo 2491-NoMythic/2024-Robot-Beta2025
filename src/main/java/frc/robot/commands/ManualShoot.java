@@ -3,26 +3,26 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
+
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.settings.Constants.IndexerConstants;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj2.command.Command;
-
 /**
-This command sets the indexer to one of two speeds, depending on the D-pad(90, 45 and 135 = INDEXER_AMP_SPEED), otherwise speed is equal
- to INDEXER_SHOOTING_SPEED
- **/
+ * This command sets the indexer to one of two speeds, depending on the D-pad(90, 45 and 135 =
+ * INDEXER_AMP_SPEED), otherwise speed is equal to INDEXER_SHOOTING_SPEED
+ */
 public class ManualShoot extends Command {
   private IndexerSubsystem indexer;
   DoubleSupplier ampSupplier;
   IntakeSubsystem intake;
-  /** Creates a new ManualShoot. 
-   * This command sets the indexer to one of two speeds, depending on the D-pad(90, 45 and 135 = INDEXER_AMP_SPEED), otherwise speed is equal
-     to INDEXER_SHOOTING_SPEED. 
-  */
+
+  /**
+   * Creates a new ManualShoot. This command sets the indexer to one of two speeds, depending on the
+   * D-pad(90, 45 and 135 = INDEXER_AMP_SPEED), otherwise speed is equal to INDEXER_SHOOTING_SPEED.
+   */
   public ManualShoot(IndexerSubsystem indexer, DoubleSupplier ampSupplier, IntakeSubsystem intake) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(indexer, intake);

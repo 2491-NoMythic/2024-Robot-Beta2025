@@ -1,32 +1,23 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license https://software-metadata.revrobotics.com/REVLib-2024.jsonfile in the root directory of this project.
+// the WPILib BSD license https://software-metadata.revrobotics.com/REVLib-2024.jsonfile in the root
+// directory of this project.
 
 package frc.robot.subsystems;
 
-import static frc.robot.settings.Constants.ShooterConstants.CURRENT_LIMIT;
-
-import com.ctre.phoenix6.signals.ControlModeValue;
 import com.revrobotics.spark.SparkAnalogSensor;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkLowLevel;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.AnalogSensorConfig;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.SignalsConfig;
-import com.revrobotics.spark.config.SparkBaseConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.AlternateEncoderConfig.Type;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -37,6 +28,7 @@ import frc.robot.settings.Constants.IntakeConstants;
 public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new Intake. */
   SparkMax intake1;
+
   ClosedLoopConfig intake1PIDConfig;
   SparkMaxConfig intake1Config;
   SparkMax intake2;
@@ -57,34 +49,39 @@ public class IntakeSubsystem extends SubsystemBase {
   double intakeRunSpeed;
 
   public IntakeSubsystem() {
-    //creates and applies the configurations for the motor Intake1 and it's PID configurator
+    // creates and applies the configurations for the motor Intake1 and it's PID
+    // configurator
     intake1PIDConfig = new ClosedLoopConfig();
     intake1Config = new SparkMaxConfig();
     intake1 = new SparkMax(IntakeConstants.INTAKE_1_MOTOR, SparkLowLevel.MotorType.kBrushless);
     intake1PIDConfig.pidf(
-      IntakeConstants.INTAKE_1_kP, 
-      IntakeConstants.INTAKE_1_kI, 
-      IntakeConstants.INTAKE_1_kD,
-      IntakeConstants.INTAKE_1_kFF);
+        IntakeConstants.INTAKE_1_kP,
+        IntakeConstants.INTAKE_1_kI,
+        IntakeConstants.INTAKE_1_kD,
+        IntakeConstants.INTAKE_1_kFF);
     intake1.setInverted(true);
     intake1Config.idleMode(IdleMode.kCoast);
     intake1Config.smartCurrentLimit(25, 40, 1000);
     intake1Config.apply(intake1PIDConfig);
-    intake1.configure(intake1Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-      //creates and applies the configurations for the motor Intake2 and it's PID configurator
+    intake1.configure(
+        intake1Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    // creates and applies the configurations for the motor Intake2 and it's PID
+    // configurator
     intake2Config = new SparkMaxConfig();
     intake2PIDConfig = new ClosedLoopConfig();
     intake2 = new SparkMax(IntakeConstants.INTAKE_2_MOTOR, SparkLowLevel.MotorType.kBrushless);
-    intake2PIDConfig.pidf(IntakeConstants.INTAKE_2_kP, 
-                           IntakeConstants.INTAKE_2_kI, 
-                           IntakeConstants.INTAKE_2_kD,
-                           IntakeConstants.INTAKE_2_kFF);
+    intake2PIDConfig.pidf(
+        IntakeConstants.INTAKE_2_kP,
+        IntakeConstants.INTAKE_2_kI,
+        IntakeConstants.INTAKE_2_kD,
+        IntakeConstants.INTAKE_2_kFF);
     intake2.setInverted(true);
     intake2Config.idleMode(IdleMode.kCoast);
     intake2Config.smartCurrentLimit(25, 40, 1000);
     intake2PIDConfig.apply(intake2PIDConfig);
-    intake2.configure(intake2Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    //defines the analog sensor
+    intake2.configure(
+        intake2Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    // defines the analog sensor
     m_DistanceSensor = intake1.getAnalog();
 
     if (Preferences.getBoolean("IntakeSideWheels", false)) {
@@ -116,10 +113,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   /**
-   * sets the intakes speed. If the IntakeSideWheels preference is set to false, you can put whatever number you want in as IntakeSideRunSpeed
-   * <p>
-   * uses percentage of full power
-   * 
+   * sets the intakes speed. If the IntakeSideWheels preference is set to false, you can put
+   * whatever number you want in as IntakeSideRunSpeed
+   *
+   * <p>uses percentage of full power
+   *
    * @param intakeRunSpeed percentage of full power, from -1 to 1
    * @param intakeSideRunSpeed percentage of full power of the side wheels, from -1 to 1
    */
@@ -131,7 +129,8 @@ public class IntakeSubsystem extends SubsystemBase {
       intakeSideRight.set(intakeSideRunSpeed);
     }
   }
-  public void function(double variable){
+
+  public void function(double variable) {
     intake1.set(variable);
   }
 
@@ -148,9 +147,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
   /**
    * sets the intakes speed
-   * <p>
-   * uses percentage of full power
-   * 
+   *
+   * <p>uses percentage of full power
+   *
    * @param intakeRunSpeed NEGATIVE percentage of full power
    */
   public void intakeNo(double intakeRunSpeed) {
@@ -162,9 +161,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
-  /**
-   * sets the intake's power to 0
-   */
+  /** sets the intake's power to 0 */
   public void intakeOff() {
     intake1.set(0);
     intake2.set(0);
@@ -175,9 +172,8 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   /**
-   * uses the distance sensor inside the indexer to tell if there is a note fully
-   * inside the indexer
-   * 
+   * uses the distance sensor inside the indexer to tell if there is a note fully inside the indexer
+   *
    * @return if the sensor sees something within it's range in front of it
    */
   public boolean isNoteSeen() {

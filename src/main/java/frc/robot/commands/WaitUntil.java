@@ -4,14 +4,14 @@
 
 package frc.robot.commands;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.function.BooleanSupplier;
 
 public class WaitUntil extends Command {
   /** Creates a new WaitUntil. */
   BooleanSupplier condition;
+
   public WaitUntil(BooleanSupplier condition) {
     this.condition = condition;
     // Use addRequirements() here to declare subsystem dependencies.

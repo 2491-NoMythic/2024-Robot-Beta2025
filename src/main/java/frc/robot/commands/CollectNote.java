@@ -27,6 +27,7 @@ public class CollectNote extends Command {
   Boolean closeNote;
   double tx;
   double ty;
+
   /** Creates a new CollectNote. */
   public CollectNote(DrivetrainSubsystem drivetrain, Limelight limelight) {
     addRequirements(drivetrain);
@@ -41,15 +42,17 @@ public class CollectNote extends Command {
   public void initialize() {
     runsInvalid = 0;
     closeNote = false;
-    txController = new PIDController(
-        // Vision.K_DETECTOR_TX_P,
-        0.035,//0.03,
-        Vision.K_DETECTOR_TX_I,
-        Vision.K_DETECTOR_TX_D);
-    tyController = new PIDController(
-        0.6,//Vision.K_DETECTOR_TY_P,
-        Vision.K_DETECTOR_TY_I,
-        Vision.K_DETECTOR_TY_D);
+    txController =
+        new PIDController(
+            // Vision.K_DETECTOR_TX_P,
+            0.035, // 0.03,
+            Vision.K_DETECTOR_TX_I,
+            Vision.K_DETECTOR_TX_D);
+    tyController =
+        new PIDController(
+            0.6, // Vision.K_DETECTOR_TY_P,
+            Vision.K_DETECTOR_TY_I,
+            Vision.K_DETECTOR_TY_D);
     tyLimiter = new SlewRateLimiter(20, -20, 0);
     txController.setSetpoint(0);
     tyController.setSetpoint(2.5);
@@ -58,60 +61,65 @@ public class CollectNote extends Command {
     detectorData = limelight.getNeuralDetectorValues();
     SmartDashboard.putBoolean("note seen", detectorData.isResultValid);
   }
-  
+
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     detectorData = limelight.getNeuralDetectorValues();
 
     // if (!detectorData.isResultValid) {
-    //   if (runsInvalid <= 10) { // don't stop imediately, in case only a couple frames were missed
-    //     drivetrain.drive(new ChassisSpeeds(tyLimiter.calculate(0), 0, 0));
-    //   } else {
-    //     drivetrain.stop();
-    //   }
-    //   System.err.println("invalidDetectorData");
-    //   runsInvalid++;
-    //   return;
+    // if (runsInvalid <= 10) { // don't stop imediately, in case only a couple
+    // frames were missed
+    // drivetrain.drive(new ChassisSpeeds(tyLimiter.calculate(0), 0, 0));
     // } else {
-    //   runsInvalid = 0;
+    // drivetrain.stop();
     // }
-    
+    // System.err.println("invalidDetectorData");
+    // runsInvalid++;
+    // return;
+    // } else {
+    // runsInvalid = 0;
+    // }
+
     ty = detectorData.ty;
-    if(detectorData.isResultValid){
-        tx = -detectorData.tx;
-        double forwardSpeed = tyLimiter.calculate(-20/Math.abs(tx));
-        if(Math.abs(forwardSpeed)>1) {forwardSpeed = -1;}
-        double sidewaysSpeed = txController.calculate(-tx);
-        if(sidewaysSpeed>1){sidewaysSpeed = 1;}
-        if(sidewaysSpeed<-1){sidewaysSpeed = -1;}
-        drivetrain.drive(new ChassisSpeeds(
-          forwardSpeed,
-          sidewaysSpeed,
-          0));
-        SmartDashboard.putNumber("CollectNote/forward speed limited", forwardSpeed);
-    } 
-    else {
-      drivetrain.drive(new ChassisSpeeds(
-        -1, 0, 0));
-        runsInvalid++;
+    if (detectorData.isResultValid) {
+      tx = -detectorData.tx;
+      double forwardSpeed = tyLimiter.calculate(-20 / Math.abs(tx));
+      if (Math.abs(forwardSpeed) > 1) {
+        forwardSpeed = -1;
+      }
+      double sidewaysSpeed = txController.calculate(-tx);
+      if (sidewaysSpeed > 1) {
+        sidewaysSpeed = 1;
+      }
+      if (sidewaysSpeed < -1) {
+        sidewaysSpeed = -1;
+      }
+      drivetrain.drive(new ChassisSpeeds(forwardSpeed, sidewaysSpeed, 0));
+      SmartDashboard.putNumber("CollectNote/forward speed limited", forwardSpeed);
+    } else {
+      drivetrain.drive(new ChassisSpeeds(-1, 0, 0));
+      runsInvalid++;
     }
     // else {
-    //   runsInvalid++;
+    // runsInvalid++;
     // }
-    if (ty<5.5){
+    if (ty < 5.5) {
       closeNote = true;
-    } 
-    
-    SmartDashboard.putNumber("CollectNote/calculated radians per second", txController.calculate(tx));
-    SmartDashboard.putNumber("CollectNote/calculated forward meters per second", tyLimiter.calculate(-20/Math.abs(tx)));
+    }
+
+    SmartDashboard.putNumber(
+        "CollectNote/calculated radians per second", txController.calculate(tx));
+    SmartDashboard.putNumber(
+        "CollectNote/calculated forward meters per second",
+        tyLimiter.calculate(-20 / Math.abs(tx)));
     SmartDashboard.putBoolean("CollectNote/closeNote", closeNote);
     SmartDashboard.putBoolean("CollectNote/isNoteSeen", detectorData.isResultValid);
     SmartDashboard.putNumber("CollectNote/runsInvalid", runsInvalid);
-    // drives the robot forward faster if the object is higher up on the screen, and turns it more based on how far away the object is from x=0
+    // drives the robot forward faster if the object is higher up on the screen, and
+    // turns it more
+    // based on how far away the object is from x=0
   }
-  
-
 
   // Called once the command ends or is interrupted.
   @Override
@@ -124,6 +132,8 @@ public class CollectNote extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return ((tyController.atSetpoint() && txController.atSetpoint()) || detectorData == null ||runsInvalid>5); 
+    return ((tyController.atSetpoint() && txController.atSetpoint())
+        || detectorData == null
+        || runsInvalid > 5);
   }
 }

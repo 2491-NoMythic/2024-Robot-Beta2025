@@ -6,23 +6,20 @@ package frc.robot.commands.goToPose;
 
 import static frc.robot.settings.Constants.DriveConstants.DEFAULT_PATH_CONSTRAINTS;
 
-import java.io.IOException;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
-
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import java.io.IOException;
 import org.json.simple.parser.ParseException;
-
-
 
 public class GoToClimbSpot extends Command {
   Command actualCommand;
   DrivetrainSubsystem drivetrain;
   SendableChooser<String> climbSpotChooser;
+
   /** Creates a new GoToAmp. */
   public GoToClimbSpot(DrivetrainSubsystem drivetrain, SendableChooser<String> climbSpotChooser) {
     this.climbSpotChooser = climbSpotChooser;
@@ -35,62 +32,74 @@ public class GoToClimbSpot extends Command {
   @Override
   public void initialize() {
     try {
-    PathPlannerPath climbMidRPath = PathPlannerPath.fromPathFile("climbMidR");
-    PathPlannerPath climbMidMPath = PathPlannerPath.fromPathFile("climbMidM");
-    PathPlannerPath climbMidLPath = PathPlannerPath.fromPathFile("climbMidL");
-    PathPlannerPath climbSourceSideRPath = PathPlannerPath.fromPathFile("climbSourceSideR");
-    PathPlannerPath climbSourceSideMPath = PathPlannerPath.fromPathFile("climbSourceSideM");
-    PathPlannerPath climbSourceSideLPath = PathPlannerPath.fromPathFile("climbSourceSideL");
-    PathPlannerPath climbAmpSideRPath = PathPlannerPath.fromPathFile("climbAmpSideR");
-    PathPlannerPath climbAmpSideMPath = PathPlannerPath.fromPathFile("climbAmpSideM");
-    PathPlannerPath climbAmpSideLPath = PathPlannerPath.fromPathFile("climbAmpSideL");
-    switch (climbSpotChooser.getSelected()) {
-      case "L-Chain Left":
-        System.out.println("L-Chain Source!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbSourceSideLPath, DEFAULT_PATH_CONSTRAINTS);        
-        break;    
-       case "L-Chain Middle":
-        System.out.println("L-Chain Middle!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbMidLPath, DEFAULT_PATH_CONSTRAINTS);        
-        break;
-       case "L-Chain Right":
-        System.out.println("L-Chain Amp!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbAmpSideLPath, DEFAULT_PATH_CONSTRAINTS);      
-      case "Mid-Chain Left":
-        System.out.println("Mid-Chain Source!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbSourceSideMPath, DEFAULT_PATH_CONSTRAINTS);        
-        break;    
-       case "Mid-Chain Middle":
-        System.out.println("Mid-Chain Middle!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbMidMPath, DEFAULT_PATH_CONSTRAINTS);        
-        break;
-       case "Mid-Chain Right":
-        System.out.println("Mid-Chain Amp!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbAmpSideMPath, DEFAULT_PATH_CONSTRAINTS);    
-        break;
-      case "R-Chain Left":
-        System.out.println("R-Chain Source!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbSourceSideRPath, DEFAULT_PATH_CONSTRAINTS);        
-        break;    
-       case "R-Chain Middle":
-        System.out.println("R-Chain Middle!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbMidRPath, DEFAULT_PATH_CONSTRAINTS);        
-        break;
-       case "R-Chain Right":
-        System.out.println("R-Chain Amp!");
-        actualCommand = AutoBuilder.pathfindThenFollowPath(climbAmpSideRPath, DEFAULT_PATH_CONSTRAINTS);
-        break; 
-      default:
-      System.out.println("We broke!(Or went to the default command)");
-        break;
-    }
+      PathPlannerPath climbMidRPath = PathPlannerPath.fromPathFile("climbMidR");
+      PathPlannerPath climbMidMPath = PathPlannerPath.fromPathFile("climbMidM");
+      PathPlannerPath climbMidLPath = PathPlannerPath.fromPathFile("climbMidL");
+      PathPlannerPath climbSourceSideRPath = PathPlannerPath.fromPathFile("climbSourceSideR");
+      PathPlannerPath climbSourceSideMPath = PathPlannerPath.fromPathFile("climbSourceSideM");
+      PathPlannerPath climbSourceSideLPath = PathPlannerPath.fromPathFile("climbSourceSideL");
+      PathPlannerPath climbAmpSideRPath = PathPlannerPath.fromPathFile("climbAmpSideR");
+      PathPlannerPath climbAmpSideMPath = PathPlannerPath.fromPathFile("climbAmpSideM");
+      PathPlannerPath climbAmpSideLPath = PathPlannerPath.fromPathFile("climbAmpSideL");
+      switch (climbSpotChooser.getSelected()) {
+        case "L-Chain Left":
+          System.out.println("L-Chain Source!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbSourceSideLPath, DEFAULT_PATH_CONSTRAINTS);
+          break;
+        case "L-Chain Middle":
+          System.out.println("L-Chain Middle!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbMidLPath, DEFAULT_PATH_CONSTRAINTS);
+          break;
+        case "L-Chain Right":
+          System.out.println("L-Chain Amp!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbAmpSideLPath, DEFAULT_PATH_CONSTRAINTS);
+        case "Mid-Chain Left":
+          System.out.println("Mid-Chain Source!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbSourceSideMPath, DEFAULT_PATH_CONSTRAINTS);
+          break;
+        case "Mid-Chain Middle":
+          System.out.println("Mid-Chain Middle!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbMidMPath, DEFAULT_PATH_CONSTRAINTS);
+          break;
+        case "Mid-Chain Right":
+          System.out.println("Mid-Chain Amp!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbAmpSideMPath, DEFAULT_PATH_CONSTRAINTS);
+          break;
+        case "R-Chain Left":
+          System.out.println("R-Chain Source!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbSourceSideRPath, DEFAULT_PATH_CONSTRAINTS);
+          break;
+        case "R-Chain Middle":
+          System.out.println("R-Chain Middle!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbMidRPath, DEFAULT_PATH_CONSTRAINTS);
+          break;
+        case "R-Chain Right":
+          System.out.println("R-Chain Amp!");
+          actualCommand =
+              AutoBuilder.pathfindThenFollowPath(climbAmpSideRPath, DEFAULT_PATH_CONSTRAINTS);
+          break;
+        default:
+          System.out.println("We broke!(Or went to the default command)");
+          break;
+      }
 
-  actualCommand.initialize();
+      actualCommand.initialize();
+    } catch (IOException e) {
+      System.out.println("got ioException trying to load paths");
+    } catch (ParseException i) {
+      System.out.println("got ParseException trying to load paths");
+    } catch (FileVersionException o) {
+      System.out.println("got FileVerionException trying to load paths");
+    }
   }
-  catch(IOException e){System.out.println("got ioException trying to load paths");}
-  catch(ParseException i){System.out.println("got ParseException trying to load paths");}
-  catch(FileVersionException o){System.out.println("got FileVerionException trying to load paths");}
-}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override

@@ -8,12 +8,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.settings.Constants.DriveConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class MoveMeters extends Command {
   /** Creates a new MoveMeters. */
   DrivetrainSubsystem m_drivetrain;
+
   double m_meters;
   double m_forwardSpeed;
   double m_rightSpeed;
@@ -26,7 +26,13 @@ public class MoveMeters extends Command {
   double distanceX;
   double distanceY;
   Pose2d pose;
-  public MoveMeters(DrivetrainSubsystem drivetrain, double meters, double forwardSpeed, double rightSpeed, double angleSpeed) {
+
+  public MoveMeters(
+      DrivetrainSubsystem drivetrain,
+      double meters,
+      double forwardSpeed,
+      double rightSpeed,
+      double angleSpeed) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_drivetrain = drivetrain;
     m_meters = Math.abs(meters);
@@ -71,6 +77,6 @@ public class MoveMeters extends Command {
   @Override
   public boolean isFinished() {
     // return distance >= m_meters;
-    return distance>=m_meters;
+    return distance >= m_meters;
   }
 }

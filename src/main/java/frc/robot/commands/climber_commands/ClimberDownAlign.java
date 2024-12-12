@@ -11,11 +11,10 @@ import frc.robot.subsystems.Climber;
 public class ClimberDownAlign extends Command {
   /** Creates a new ClimberDown. */
   Climber m_climber;
-  
+
   public ClimberDownAlign(Climber climber) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_climber = climber;
-
   }
 
   // Called when the command is initially scheduled.
@@ -37,6 +36,7 @@ public class ClimberDownAlign extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(m_climber.getRightRPM()) < ClimberConstants.CLIMBER_RPM && Math.abs(m_climber.getLeftRPM()) < ClimberConstants.CLIMBER_RPM;
+    return Math.abs(m_climber.getRightRPM()) < ClimberConstants.CLIMBER_RPM
+        && Math.abs(m_climber.getLeftRPM()) < ClimberConstants.CLIMBER_RPM;
   }
 }

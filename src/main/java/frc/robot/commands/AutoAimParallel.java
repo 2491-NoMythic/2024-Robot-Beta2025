@@ -6,7 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.ShooterSubsystem; 
+import frc.robot.subsystems.ShooterSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -16,17 +16,18 @@ public class AutoAimParallel extends ParallelCommandGroup {
   ShooterSubsystem m_ShooterSubsystem;
 
   /** Creates a new autoAimParallel. */
-  public AutoAimParallel( DrivetrainSubsystem drivetrain /*, ShooterSubsystem shooter */) {
+  public AutoAimParallel(DrivetrainSubsystem drivetrain /* , ShooterSubsystem shooter */) {
     m_drivetrain = drivetrain;
     // m_ShooterSubsystem = shooterSubsystem;
 
     ;
-    
+
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new RotateRobot(drivetrain, drivetrain::calculateSpeakerAngle)//,
-      // new AngleShooter(shooterSubsystem, shooterSubsystem.calculateSpeakerAngle(drivetrain.getPose()))
-    );
+        new RotateRobot(drivetrain, drivetrain::calculateSpeakerAngle) // ,
+        // new AngleShooter(shooterSubsystem,
+        // shooterSubsystem.calculateSpeakerAngle(drivetrain.getPose()))
+        );
   }
 }

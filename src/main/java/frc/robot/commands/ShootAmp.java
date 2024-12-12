@@ -16,6 +16,7 @@ public class ShootAmp extends Command {
   IndexerSubsystem indexer;
   ShooterSubsystem shooter;
   Timer timer;
+
   /** Creates a new shootAmp. */
   public ShootAmp(IndexerSubsystem indexer, ShooterSubsystem shooter) {
     addRequirements(shooter, indexer);
@@ -36,16 +37,15 @@ public class ShootAmp extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (Preferences.getBoolean("CompBot", true)){
-      if(timer.get()>1) {
+    if (Preferences.getBoolean("CompBot", true)) {
+      if (timer.get() > 1) {
         indexer.set(IndexerConstants.COMP_INDEXER_AMP_SPEED);
+      }
+    } else {
+      if (timer.get() > 1) {
+        indexer.set(IndexerConstants.PRAC_INDEXER_AMP_SPEED);
+      }
     }
-  }
-  else{
-    if(timer.get()>1){
-      indexer.set(IndexerConstants.PRAC_INDEXER_AMP_SPEED);
-    }
-  }
   }
 
   // Called once the command ends or is interrupted.
@@ -59,6 +59,6 @@ public class ShootAmp extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return timer.get()>1.5;
+    return timer.get() > 1.5;
   }
 }

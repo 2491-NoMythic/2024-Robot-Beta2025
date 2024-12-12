@@ -10,11 +10,10 @@ import frc.robot.subsystems.Climber;
 public class ClimberPullDown extends Command {
   /** Creates a new ClimberDown. */
   Climber m_climber;
-  
+
   public ClimberPullDown(Climber climber) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_climber = climber;
-
   }
 
   // Called when the command is initially scheduled.

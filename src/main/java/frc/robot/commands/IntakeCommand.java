@@ -5,15 +5,18 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.settings.IntakeDirection;
 import frc.robot.settings.Constants.IntakeConstants;
+import frc.robot.settings.IntakeDirection;
+import frc.robot.subsystems.IntakeSubsystem;
+
 public class IntakeCommand extends Command {
   /** Creates a new IntakeLeftCommand. */
   IntakeSubsystem intake;
+
   IntakeDirection iDirection;
+
   public IntakeCommand(IntakeSubsystem intake, IntakeDirection iDirection) {
-  
+
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(intake);
     this.intake = intake;

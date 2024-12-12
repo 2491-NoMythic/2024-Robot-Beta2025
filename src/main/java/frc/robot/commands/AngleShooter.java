@@ -4,22 +4,21 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AngleShooterSubsystem;
+import java.util.function.DoubleSupplier;
 
 public class AngleShooter extends Command {
   /** Creates a new AngleShooter. */
   double desiredShooterAngle;
+
   DoubleSupplier desiredShooterAngleSupplier;
   double currentShooterAngle;
   double differenceAngle;
   double angleSpeed;
   AngleShooterSubsystem m_shooter;
   double desiredShooterAngleSpeed;
-  
-  
+
   public AngleShooter(AngleShooterSubsystem shooter, DoubleSupplier desiredShooterAngleSupplier) {
     // Use addRequirements() here to declare subsystem dependencies.\
     m_shooter = shooter;

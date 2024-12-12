@@ -13,14 +13,11 @@ import frc.robot.subsystems.Climber;
 public class AutoClimb extends SequentialCommandGroup {
   /** Creates a new AutoClimb. */
   Climber m_climber;
-  
+
   public AutoClimb(Climber climber) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     m_climber = climber;
-    addCommands(
-      new ClimberDownAlign(m_climber),
-      new ClimberPullDown(m_climber)
-    );
+    addCommands(new ClimberDownAlign(m_climber), new ClimberPullDown(m_climber));
   }
 }

@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
@@ -17,8 +16,14 @@ public class DriveTimeCommand extends Command {
   double time;
   Timer timer;
   DrivetrainSubsystem drivetrain;
+
   /** Creates a new DriveTimeCommand. */
-  public DriveTimeCommand(double forwardSpeed, double sidewaysSpeed, double radiansPerSecond, double time, DrivetrainSubsystem drivetrain) {
+  public DriveTimeCommand(
+      double forwardSpeed,
+      double sidewaysSpeed,
+      double radiansPerSecond,
+      double time,
+      DrivetrainSubsystem drivetrain) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.forwardSpeed = forwardSpeed;
     this.sidewaysSpeed = sidewaysSpeed;
@@ -35,15 +40,11 @@ public class DriveTimeCommand extends Command {
     timer.start();
     timer.reset();
   }
-  
+
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-  drivetrain.drive(new ChassisSpeeds(
-    forwardSpeed, 
-    sidewaysSpeed,
-    radiansPerSecond
-  ));
+    drivetrain.drive(new ChassisSpeeds(forwardSpeed, sidewaysSpeed, radiansPerSecond));
   }
 
   // Called once the command ends or is interrupted.
@@ -57,6 +58,6 @@ public class DriveTimeCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return (timer.get()>=time);
+    return (timer.get() >= time);
   }
 }
