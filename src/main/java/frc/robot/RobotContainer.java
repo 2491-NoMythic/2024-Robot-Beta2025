@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -168,7 +167,7 @@ public class RobotContainer {
     driverController = new PS4Controller(DRIVE_CONTROLLER_ID);
     operatorController = new PS4Controller(OPERATOR_CONTROLLER_ID);
     // operatorController = new PS4Controller(OPERATOs_CONTROLLER_ID);
-    PDP = new PowerDistribution(1, ModuleType.kRev);
+    // PDP = new PowerDistribution(1, ModuleType.kRev);
 
     ZeroGyroSup = driverController::getPSButton;
     ForceVisionSup = driverController::getOptionsButton;
@@ -450,7 +449,7 @@ public class RobotContainer {
           new AngleShooter(
               angleShooterSubsystem, () -> ShooterConstants.PRAC_MAXIMUM_SHOOTER_ANGLE));
     }
-    if (indexerExists) {
+    if (indexerExists && intakeExists) {
       new Trigger(ManualShootSup)
           .whileTrue(new ManualShoot(indexer, driverController::getPOV, intake));
     }
@@ -774,7 +773,7 @@ public class RobotContainer {
       NamedCommands.registerCommand(
           "note isn't held", new WaitUntil(() -> !RobotState.getInstance().isNoteSeen()));
     }
-    if (indexerExists && shooterExists) {
+    if (indexerExists && shooterExists && angleShooterExists) {
       NamedCommands.registerCommand(
           "initialShot", new InitialShot(shooter, indexer, 0.9, 0.1, angleShooterSubsystem));
       // the following command will both aim the robot at the speaker (with the
