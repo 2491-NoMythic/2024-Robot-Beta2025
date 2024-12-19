@@ -1,14 +1,14 @@
 package frc.robot.commands;
 
-import static frc.robot.settings.Constants.ShooterConstants.AUTO_AIM_ROBOT_kD;
-import static frc.robot.settings.Constants.ShooterConstants.AUTO_AIM_ROBOT_kI;
-import static frc.robot.settings.Constants.ShooterConstants.AUTO_AIM_ROBOT_kP;
+import static frc.robot.settings.Constants.DriveConstants.AUTO_AIM_ROBOT_kD;
+import static frc.robot.settings.Constants.DriveConstants.AUTO_AIM_ROBOT_kI;
+import static frc.robot.settings.Constants.DriveConstants.AUTO_AIM_ROBOT_kP;
+import static frc.robot.settings.Constants.DriveConstants.ROBOT_ANGLE_TOLERANCE;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.settings.Constants.ShooterConstants;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import java.util.function.DoubleSupplier;
 
@@ -25,7 +25,7 @@ public class RotateRobot extends Command {
     m_drivetrain = drivetrain;
     this.desiredRobotAngleSupplier = desiredRobotAngle;
     speedController = new PIDController(AUTO_AIM_ROBOT_kP, AUTO_AIM_ROBOT_kI, AUTO_AIM_ROBOT_kD);
-    speedController.setTolerance(ShooterConstants.ROBOT_ANGLE_TOLERANCE);
+    speedController.setTolerance(ROBOT_ANGLE_TOLERANCE);
     speedController.enableContinuousInput(-180, 180);
     addRequirements(drivetrain);
   }
@@ -60,10 +60,9 @@ public class RotateRobot extends Command {
     m_drivetrain.stop();
     SmartDashboard.putBoolean("isRotateRunning", false);
   }
-
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(differenceAngle - 360) < ShooterConstants.ROBOT_ANGLE_TOLERANCE;
+    return Math.abs(differenceAngle - 360) < ROBOT_ANGLE_TOLERANCE;
   }
 }
