@@ -243,12 +243,16 @@ public final class Constants {
       driveMotorConfig.Voltage.PeakForwardVoltage = 12;
       driveMotorConfig.Voltage.PeakReverseVoltage = -12;
       driveMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-      driveMotorConfig.CurrentLimits.SupplyCurrentLimit = DriveConstants.DRIVE_CURRENT_LIMIT;
       driveMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
       driveMotorConfig.CurrentLimits.StatorCurrentLimitEnable = false;
-      // TODO: find the replacements for these two constants:
-      // driveMotorConfig.CurrentLimits.SupplyCurrentThreshold = 50;
-      // driveMotorConfig.CurrentLimits.SupplyTimeThreshold = 0.8;
+      /*
+       * the following does this:
+       * the current is always limited to 50 Amps. If the limit has been needed (motor is demanding more than 50, but limit stops it) for more than 0.8 seconds, than
+       * limit changes to DRIVE_CURRENT_LIMIT, which is 30 amps. this lower limit is enabled until the demanded current drops below the lower limit, then the 50 amp limit is enabled
+       */
+      driveMotorConfig.CurrentLimits.SupplyCurrentLimit = 50;
+      driveMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = DriveConstants.DRIVE_CURRENT_LIMIT;
+      driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = 0.8;
 
       //  Steer encoder.
       steerEncoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
