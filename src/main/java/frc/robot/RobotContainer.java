@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -43,13 +44,15 @@ public class RobotContainer {
   // gotten every time
   // we run the code.
   private final boolean useDetectorLimelight = Preferences.getBoolean("Detector Limelight", true);
+  private final boolean useXboxController = Preferences.getBoolean("Xbox Controller", true);
 
   private DrivetrainSubsystem driveTrain;
   private Drive defaultDriveCommand;
   private Lights lights;
-  private PS4Controller driverController;
-  private PS4Controller operatorController;
-  // private PS4Controller operatorController;
+  private XboxController driverControllerXbox;
+  private XboxController operatorControllerXbox;
+  private PS4Controller driverControllerPS4;
+  private PS4Controller operatorControllerPS4;
   private Limelight limelight;
   private SendableChooser<Command> autoChooser;
   private PowerDistribution PDP;
@@ -66,42 +69,56 @@ public class RobotContainer {
     Preferences.initBoolean("Detector Limelight", false);
     Preferences.initBoolean("Use Limelight", true);
     Preferences.initBoolean("Use 2 Limelights", true);
+    Preferences.initBoolean("Xbox Controller", true);
 
     DataLogManager.start(); // Start logging
     DriverStation.startDataLog(DataLogManager.getLog()); // Joystick Data logging
+    /*
+     * the following code uses the Xbox Controller Preference to determine our controllers and all our bindings. any time you want to use/create a binding,
+     * define a supplier as it in both conditions of this if()else{} code.
+     */
+    if (useXboxController) {
+      driverControllerXbox = new XboxController(DRIVE_CONTROLLER_ID);
+      operatorControllerXbox = new XboxController(OPERATOR_CONTROLLER_ID);
 
-    // DataLogManager.start();
-    // URCL.start();
-    // SignalLogger.setPath("/media/sda1/ctre-logs/");
-    // SignalLogger.start();
-    driverController = new PS4Controller(DRIVE_CONTROLLER_ID);
-    operatorController = new PS4Controller(OPERATOR_CONTROLLER_ID);
-    // operatorController = new PS4Controller(OPERATOs_CONTROLLER_ID);
-    // PDP = new PowerDistribution(1, ModuleType.kRev);
+      ZeroGyroSup = driverControllerXbox::getStartButton;
+    } else {
+      driverControllerPS4 = new PS4Controller(DRIVE_CONTROLLER_ID);
+      operatorControllerPS4 = new PS4Controller(OPERATOR_CONTROLLER_ID);
 
-    ZeroGyroSup = driverController::getPSButton;
+      ZeroGyroSup = driverControllerPS4::getPSButton;
+    }
 
-    // = new PathPlannerPath(null, DEFAUL_PATH_CONSTRAINTS, null, climberExists);
     limelightInit();
     driveTrainInst();
     lightsInst();
 
     configureDriveTrain();
-    configureBindings();
+    configureBindings(); // Configure the trigger bindings
     autoInit();
-    // Configure the trigger bindings
   }
 
   private void driveTrainInst() {
     driveTrain = new DrivetrainSubsystem();
-    defaultDriveCommand =
-        new Drive(
-            driveTrain,
-            () -> false,
-            () -> modifyAxis(-driverController.getRawAxis(Y_AXIS), DEADBAND_NORMAL),
-            () -> modifyAxis(-driverController.getRawAxis(X_AXIS), DEADBAND_NORMAL),
-            () -> modifyAxis(-driverController.getRawAxis(Z_AXIS), DEADBAND_NORMAL));
-    driveTrain.setDefaultCommand(defaultDriveCommand);
+    if (useXboxController) {
+      defaultDriveCommand =
+          new Drive(
+              driveTrain,
+              () -> false,
+              () -> modifyAxis(-driverControllerXbox.getRawAxis(Y_AXIS), DEADBAND_NORMAL),
+              () -> modifyAxis(-driverControllerXbox.getRawAxis(X_AXIS), DEADBAND_NORMAL),
+              () -> modifyAxis(-driverControllerXbox.getRawAxis(Z_AXIS), DEADBAND_NORMAL));
+      driveTrain.setDefaultCommand(defaultDriveCommand);
+    } else {
+      defaultDriveCommand =
+          new Drive(
+              driveTrain,
+              () -> false,
+              () -> modifyAxis(-driverControllerPS4.getRawAxis(Y_AXIS), DEADBAND_NORMAL),
+              () -> modifyAxis(-driverControllerPS4.getRawAxis(X_AXIS), DEADBAND_NORMAL),
+              () -> modifyAxis(-driverControllerPS4.getRawAxis(Z_AXIS), DEADBAND_NORMAL));
+      driveTrain.setDefaultCommand(defaultDriveCommand);
+    }
   }
 
   private void autoInit() {
